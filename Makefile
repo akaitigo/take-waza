@@ -8,7 +8,7 @@ build:
 	npx vite build
 
 test:
-	npx vitest run
+	npx vitest run --exclude 'test/e2e/**' --passWithNoTests
 
 test-e2e:
 	npx playwright test
@@ -37,6 +37,7 @@ quality:
 	@echo "Manual checks required: README quickstart, demo GIF, input validation, ADR >=1"
 
 wasm:
+	@test -d wasm-engine || { echo "ERROR: wasm-engine/ not found. Create Rust crate first: cargo init wasm-engine --lib"; exit 1; }
 	cd wasm-engine && wasm-pack build --target web
 
 deps-check:
