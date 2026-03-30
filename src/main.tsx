@@ -1,14 +1,36 @@
 import { StrictMode, useMemo } from "react";
 import { createRoot } from "react-dom/client";
+import { ParameterPanel } from "./components/ParameterPanel";
 import { WeavingPreview } from "./components/WeavingPreview";
-import { generateSampleGozame } from "./lib/sample-patterns";
+import { useDebounce } from "./hooks/useDebounce";
+import { usePatternParams } from "./hooks/usePatternParams";
+import { generateSamplePattern } from "./lib/sample-patterns";
 
 function App() {
-	const graph = useMemo(() => generateSampleGozame(5, 1, 6), []);
+	const { params, setPattern, setWidth, setThickness, setCount } = usePatternParams();
+	const debouncedParams = useDebounce(params, 200);
+	const graph = useMemo(
+		() =>
+			generateSamplePattern(
+				debouncedParams.pattern,
+				debouncedParams.width,
+				debouncedParams.thickness,
+				debouncedParams.count,
+			),
+		[debouncedParams],
+	);
 
 	return (
 		<StrictMode>
-			<div style={{ width: "100vw", height: "100vh", margin: 0 }}>
+			<div
+				style={{
+					width: "100vw",
+					height: "100vh",
+					margin: 0,
+					display: "flex",
+					flexDirection: "column",
+				}}
+			>
 				<header
 					style={{
 						padding: "8px 16px",
@@ -17,13 +39,23 @@ function App() {
 						display: "flex",
 						alignItems: "center",
 						gap: "12px",
+						flexShrink: 0,
 					}}
 				>
 					<h1 style={{ margin: 0, fontSize: "1.2rem" }}>take-waza</h1>
-					<span style={{ fontSize: "0.85rem", opacity: 0.7 }}>竹細工パターンデザイナー - ござ目編み 6x6</span>
+					<span style={{ fontSize: "0.85rem", opacity: 0.7 }}>竹細工パターンデザイナー</span>
 				</header>
-				<div style={{ width: "100%", height: "calc(100vh - 44px)" }}>
-					<WeavingPreview graph={graph} />
+				<div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+					<ParameterPanel
+						params={params}
+						onPatternChange={setPattern}
+						onWidthChange={setWidth}
+						onThicknessChange={setThickness}
+						onCountChange={setCount}
+					/>
+					<div style={{ flex: 1, minWidth: 0 }}>
+						<WeavingPreview graph={graph} />
+					</div>
 				</div>
 			</div>
 		</StrictMode>
