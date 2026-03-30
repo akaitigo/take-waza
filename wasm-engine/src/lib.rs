@@ -1,5 +1,6 @@
 pub mod graph;
 pub mod patterns;
+pub mod steps;
 
 use graph::{PatternError, WeavingGraph};
 use wasm_bindgen::prelude::*;
@@ -73,6 +74,23 @@ pub fn list_patterns() -> String {
     serde_json::to_string(patterns::BUILTIN_PATTERNS).unwrap_or_else(|_| "[]".to_string())
 }
 
+/// グラフからステップ分解を実行して JSON で返す（内部関数）
+fn decompose_steps_json_inner(graph_json: &str) -> Result<String, PatternError> {
+    let graph: WeavingGraph = serde_json::from_str(graph_json).map_err(|e| PatternError {
+        message: e.to_string(),
+    })?;
+    let sequence = steps::decompose_steps(&graph)?;
+    serde_json::to_string(&sequence).map_err(|e| PatternError {
+        message: e.to_string(),
+    })
+}
+
+/// グラフからステップ分解を実行して JSON で返す (WASM FFI)
+#[wasm_bindgen]
+pub fn decompose_steps_json(graph_json: &str) -> Result<String, JsError> {
+    decompose_steps_json_inner(graph_json).map_err(|e| JsError::new(&e.message))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -115,5 +133,13 @@ mod tests {
         assert!(patterns.contains(&"mutsume".to_string()));
         assert!(patterns.contains(&"ajiro".to_string()));
         assert!(patterns.contains(&"gozame".to_string()));
+    }
+
+    #[test]
+    fn test_decompose_steps_json() {
+        let graph_json = generate_pattern_json_inner("gozame", 5.0, 1.0, 3).unwrap();
+        let steps_json = decompose_steps_json_inner(&graph_json).unwrap();
+        let sequence: steps::StepSequence = serde_json::from_str(&steps_json).unwrap();
+        assert!(sequence.total_steps > 0);
     }
 }

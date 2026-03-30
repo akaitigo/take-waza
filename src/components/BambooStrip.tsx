@@ -12,8 +12,8 @@ import type { EdgeMeshData } from "../lib/graph-to-mesh";
 
 interface BambooStripProps {
 	readonly edge: EdgeMeshData;
-	readonly opacity?: number;
-	readonly color?: string;
+	readonly opacity?: number | undefined;
+	readonly color?: string | undefined;
 }
 
 export function BambooStrip({ edge, opacity = 1, color = BAMBOO_COLOR }: BambooStripProps) {
