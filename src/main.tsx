@@ -1,9 +1,11 @@
 import { StrictMode, useMemo } from "react";
 import { createRoot } from "react-dom/client";
 import { ParameterPanel } from "./components/ParameterPanel";
+import { StepNavigator } from "./components/StepNavigator";
 import { WeavingPreview } from "./components/WeavingPreview";
 import { useDebounce } from "./hooks/useDebounce";
 import { usePatternParams } from "./hooks/usePatternParams";
+import { useStepNavigation } from "./hooks/useStepNavigation";
 import { generateSamplePattern } from "./lib/sample-patterns";
 
 function App() {
@@ -19,6 +21,8 @@ function App() {
 			),
 		[debouncedParams],
 	);
+
+	const navigation = useStepNavigation(graph);
 
 	return (
 		<StrictMode>
@@ -53,8 +57,22 @@ function App() {
 						onThicknessChange={setThickness}
 						onCountChange={setCount}
 					/>
-					<div style={{ flex: 1, minWidth: 0 }}>
-						<WeavingPreview graph={graph} />
+					<div
+						style={{
+							flex: 1,
+							minWidth: 0,
+							display: "flex",
+							flexDirection: "column",
+						}}
+					>
+						<div style={{ flex: 1, minHeight: 0 }}>
+							<WeavingPreview
+								graph={graph}
+								completedEdgeIds={navigation.completedEdgeIds}
+								currentEdgeId={navigation.currentEdgeId}
+							/>
+						</div>
+						<StepNavigator navigation={navigation} />
 					</div>
 				</div>
 			</div>

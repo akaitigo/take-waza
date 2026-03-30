@@ -12,7 +12,9 @@ import { WeavingScene } from "./WeavingScene";
 
 interface WeavingPreviewProps {
 	readonly graph: WeavingGraph | undefined;
-	readonly className?: string;
+	readonly className?: string | undefined;
+	readonly completedEdgeIds?: ReadonlySet<number> | undefined;
+	readonly currentEdgeId?: number | undefined;
 }
 
 function FallbackMessage({ message }: { readonly message: string }) {
@@ -34,7 +36,7 @@ function FallbackMessage({ message }: { readonly message: string }) {
 	);
 }
 
-export function WeavingPreview({ graph, className }: WeavingPreviewProps) {
+export function WeavingPreview({ graph, className, completedEdgeIds, currentEdgeId }: WeavingPreviewProps) {
 	if (!graph) {
 		return <FallbackMessage message="パターンを選択してください" />;
 	}
@@ -67,7 +69,7 @@ export function WeavingPreview({ graph, className }: WeavingPreviewProps) {
 				<OrbitControls enableDamping dampingFactor={0.1} minDistance={1} maxDistance={cameraDistance * 5} />
 
 				{/* シーン */}
-				<WeavingScene graph={graph} />
+				<WeavingScene graph={graph} completedEdgeIds={completedEdgeIds} currentEdgeId={currentEdgeId} />
 			</Canvas>
 		</div>
 	);
