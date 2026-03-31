@@ -19,10 +19,6 @@
 		"declarationMap": true,
 		"sourceMap": true,
 		"rootDir": "./src",
-		"baseUrl": ".",
-		"paths": {
-			"@/*": ["./src/*"]
-		},
 		"jsx": "react-jsx",
 		"skipLibCheck": true,
 		"esModuleInterop": true,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PATTERN_NAMES, type PatternName, isValidPatternName } from "./wasm-bridge";
+import { isValidPatternName, PATTERN_NAMES, type PatternName } from "./wasm-bridge";
 
 describe("PATTERN_NAMES", () => {
 	it("3つの内蔵パターンが定義されている", () => {

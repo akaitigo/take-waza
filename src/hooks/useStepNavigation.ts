@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { decomposeSteps } from "../lib/step-decompose";
 import type { StepSequence } from "../lib/step-decompose";
+import { decomposeSteps } from "../lib/step-decompose";
 import type { WeavingGraph } from "../lib/wasm-bridge";
 
 export interface StepNavigationState {
