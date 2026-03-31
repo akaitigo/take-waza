@@ -6,7 +6,7 @@
 
 import { useCallback, useState } from "react";
 import type { PatternParams } from "../hooks/usePatternParams";
-import { PATTERN_NAMES, type PatternName } from "../lib/wasm-bridge";
+import { PATTERN_NAMES, type PatternName, isValidPatternName } from "../lib/wasm-bridge";
 
 /** パターン名の日本語ラベル */
 const PATTERN_LABELS: Record<PatternName, string> = {
@@ -93,8 +93,8 @@ export function ParameterPanel({
 	const handlePatternChange = useCallback(
 		(e: React.ChangeEvent<HTMLSelectElement>) => {
 			const value = e.target.value;
-			if (PATTERN_NAMES.includes(value as PatternName)) {
-				onPatternChange(value as PatternName);
+			if (isValidPatternName(value)) {
+				onPatternChange(value);
 			}
 		},
 		[onPatternChange],
