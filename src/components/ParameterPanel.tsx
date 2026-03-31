@@ -6,7 +6,7 @@
 
 import { useCallback, useState } from "react";
 import type { PatternParams } from "../hooks/usePatternParams";
-import { PATTERN_NAMES, type PatternName, isValidPatternName } from "../lib/wasm-bridge";
+import { isValidPatternName, PATTERN_NAMES, type PatternName } from "../lib/wasm-bridge";
 
 /** パターン名の日本語ラベル */
 const PATTERN_LABELS: Record<PatternName, string> = {

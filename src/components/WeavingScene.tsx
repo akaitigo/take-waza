@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from "react";
-import { HIGHLIGHT_COLOR, graphToMeshData } from "../lib/graph-to-mesh";
+import { graphToMeshData, HIGHLIGHT_COLOR } from "../lib/graph-to-mesh";
 import type { WeavingGraph } from "../lib/wasm-bridge";
 import { BambooStrip } from "./BambooStrip";
 import { CrossingMarker } from "./CrossingMarker";

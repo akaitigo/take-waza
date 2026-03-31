@@ -5,8 +5,7 @@
  * TS で簡易的なパターンデータを生成する。
  */
 
-import type { CrossingType, PatternName, WeavingGraph } from "./wasm-bridge";
-import type { WeavingEdge, WeavingNode } from "./wasm-bridge";
+import type { CrossingType, PatternName, WeavingEdge, WeavingGraph, WeavingNode } from "./wasm-bridge";
 
 /** ヘルパー: グリッドの横・縦エッジを生成 */
 function generateGridEdges(rows: number, cols: number, width: number, thickness: number, startEdgeId: number) {

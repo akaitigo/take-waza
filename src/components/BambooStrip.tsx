@@ -7,8 +7,8 @@
 
 import { useRef } from "react";
 import type { Mesh } from "three";
-import { BAMBOO_COLOR } from "../lib/graph-to-mesh";
 import type { EdgeMeshData } from "../lib/graph-to-mesh";
+import { BAMBOO_COLOR } from "../lib/graph-to-mesh";
 
 interface BambooStripProps {
 	readonly edge: EdgeMeshData;
