@@ -7,13 +7,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { generateSamplePattern } from "../lib/sample-patterns";
-import { decomposeSteps, type StepSequence } from "../lib/step-decompose";
 import {
 	initWasmEngine,
 	isWasmReady,
 	type PatternName,
 	type WeavingGraph,
-	wasmDecomposeSteps,
 	wasmGeneratePattern,
 } from "../lib/wasm-bridge";
 
@@ -24,8 +22,6 @@ export interface UseWasmEngineReturn {
 	readonly status: WasmStatus;
 	/** パターンを生成する（WASM優先、フォールバックあり） */
 	readonly generatePattern: (name: PatternName, width: number, thickness: number, count: number) => WeavingGraph;
-	/** ステップ分解する（WASM優先、フォールバックあり） */
-	readonly decomposeGraphSteps: (graph: WeavingGraph) => StepSequence;
 }
 
 /** WASM エンジンの初期化と利用を管理する */
@@ -61,20 +57,5 @@ export function useWasmEngine(): UseWasmEngineReturn {
 		[status],
 	);
 
-	const decomposeGraphSteps = useCallback(
-		(graph: WeavingGraph): StepSequence => {
-			if (status === "ready") {
-				const wasmResult = wasmDecomposeSteps(graph);
-				if (wasmResult) return wasmResult;
-			}
-			// フォールバック: TS 側実装
-			return decomposeSteps(graph);
-		},
-		[status],
-	);
-
-	return useMemo(
-		() => ({ status, generatePattern, decomposeGraphSteps }),
-		[status, generatePattern, decomposeGraphSteps],
-	);
+	return useMemo(() => ({ status, generatePattern }), [status, generatePattern]);
 }
