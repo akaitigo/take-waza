@@ -66,10 +66,15 @@ type WasmState =
 
 let wasmState: WasmState = { status: "uninitialized" };
 
+/** WASM モジュールのパス (Vite が解決する) */
+const WASM_MODULE_PATH = "../../wasm-engine/pkg/wasm_engine.js";
+
 /** WASM モジュールを動的インポートで初期化する */
 async function loadWasmModule(): Promise<WasmModule | null> {
 	try {
-		const mod = (await import(/* @vite-ignore */ "../../wasm-engine/pkg/wasm_engine.js")) as WasmModule;
+		// 動的インポートで WASM バインディングをロード
+		// Vite がビルド時にパスを解決する。tsc は型チェック不要 (unknown 経由)
+		const mod = (await import(/* @vite-ignore */ WASM_MODULE_PATH)) as unknown as WasmModule;
 		await mod.default();
 		return mod;
 	} catch {
