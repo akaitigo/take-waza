@@ -2,8 +2,10 @@
  * WASM エンジンとの橋渡しモジュール
  *
  * wasm-engine crate の FFI を TypeScript から呼び出すためのラッパー。
- * MVP段階では WASM ビルドが完了するまでスタブ実装を提供する。
+ * WASM ロードに失敗した場合は TS 側フォールバックを使用する。
  */
+
+import type { StepSequence as WasmStepSequence } from "./step-decompose";
 
 /** 交差タイプ */
 export type CrossingType = "over" | "under";
@@ -43,4 +45,167 @@ export type PatternName = (typeof PATTERN_NAMES)[number];
 /** パターン名のバリデーション */
 export function isValidPatternName(name: string): name is PatternName {
 	return (PATTERN_NAMES as readonly string[]).includes(name);
+}
+
+/** WASM モジュールの型 (wasm-pack 生成) */
+interface WasmModule {
+	default: (input?: { module_or_path?: string } | string) => Promise<unknown>;
+	generate_pattern_json: (pattern_name: string, width: number, thickness: number, count: number) => string;
+	transform_pattern_json: (graph_json: string, new_width: number, new_thickness: number) => string;
+	decompose_steps_json: (graph_json: string) => string;
+	list_patterns: () => string;
+	ping: () => string;
+}
+
+/** WASMエンジンの初期化状態 */
+type WasmState =
+	| { readonly status: "uninitialized" }
+	| { readonly status: "loading"; readonly promise: Promise<WasmModule | null> }
+	| { readonly status: "ready"; readonly module: WasmModule }
+	| { readonly status: "failed"; readonly error: string };
+
+let wasmState: WasmState = { status: "uninitialized" };
+
+/** WASM モジュールのパス (Vite が解決する) */
+const WASM_MODULE_PATH = "../../wasm-engine/pkg/wasm_engine.js";
+
+/** WASM モジュールを動的インポートで初期化する */
+async function loadWasmModule(): Promise<WasmModule | null> {
+	try {
+		// 動的インポートで WASM バインディングをロード
+		// Vite がビルド時にパスを解決する。tsc は型チェック不要 (unknown 経由)
+		const mod = (await import(/* @vite-ignore */ WASM_MODULE_PATH)) as unknown as WasmModule;
+		await mod.default();
+		return mod;
+	} catch {
+		return null;
+	}
+}
+
+/** WASM エンジンを初期化する。既に初期化済みなら何もしない */
+export async function initWasmEngine(): Promise<boolean> {
+	if (wasmState.status === "ready") return true;
+	if (wasmState.status === "failed") return false;
+
+	if (wasmState.status === "loading") {
+		const result = await wasmState.promise;
+		return result !== null;
+	}
+
+	const promise = loadWasmModule();
+	wasmState = { status: "loading", promise };
+
+	const mod = await promise;
+	if (mod) {
+		wasmState = { status: "ready", module: mod };
+		return true;
+	}
+	wasmState = {
+		status: "failed",
+		error: "WASM モジュールのロードに失敗しました",
+	};
+	return false;
+}
+
+/** 現在 WASM が利用可能かどうか */
+export function isWasmReady(): boolean {
+	return wasmState.status === "ready";
+}
+
+/**
+ * WASM エンジンでパターンを生成する。
+ * WASM が利用不可の場合は null を返す（呼び出し側でフォールバック）。
+ */
+export function wasmGeneratePattern(
+	patternName: PatternName,
+	width: number,
+	thickness: number,
+	count: number,
+): WeavingGraph | null {
+	if (wasmState.status !== "ready") return null;
+	try {
+		const json = wasmState.module.generate_pattern_json(patternName, width, thickness, count);
+		return JSON.parse(json) as WeavingGraph;
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * WASM エンジンでパターンのパラメータ変換を行う。
+ * WASM が利用不可の場合は null を返す。
+ */
+export function wasmTransformPattern(graph: WeavingGraph, newWidth: number, newThickness: number): WeavingGraph | null {
+	if (wasmState.status !== "ready") return null;
+	try {
+		const graphJson = JSON.stringify(graph);
+		const json = wasmState.module.transform_pattern_json(graphJson, newWidth, newThickness);
+		return JSON.parse(json) as WeavingGraph;
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * WASM エンジンでステップ分解を行う。
+ * WASM が利用不可の場合は null を返す。
+ */
+export function wasmDecomposeSteps(graph: WeavingGraph): WasmStepSequence | null {
+	if (wasmState.status !== "ready") return null;
+	try {
+		const graphJson = JSON.stringify(graph);
+		const json = wasmState.module.decompose_steps_json(graphJson);
+		const raw = JSON.parse(json) as {
+			pattern_name: string;
+			steps: readonly {
+				step_index: number;
+				edge_id: number;
+				from_node: number;
+				to_node: number;
+				description: string;
+			}[];
+			total_steps: number;
+		};
+		// Rust 側の snake_case を TS 側の camelCase に変換
+		return {
+			patternName: raw.pattern_name,
+			steps: raw.steps.map((s) => ({
+				stepIndex: s.step_index,
+				edgeId: s.edge_id,
+				fromNode: s.from_node,
+				toNode: s.to_node,
+				description: s.description,
+			})),
+			totalSteps: raw.total_steps,
+		};
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * WASM エンジンの ping を呼び出す。
+ * WASM が利用不可の場合は null を返す。
+ */
+export function wasmPing(): string | null {
+	if (wasmState.status !== "ready") return null;
+	try {
+		return wasmState.module.ping();
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * WASM エンジンで利用可能なパターン一覧を取得する。
+ * WASM が利用不可の場合は null を返す。
+ */
+export function wasmListPatterns(): readonly string[] | null {
+	if (wasmState.status !== "ready") return null;
+	try {
+		const json = wasmState.module.list_patterns();
+		return JSON.parse(json) as string[];
+	} catch {
+		return null;
+	}
 }
