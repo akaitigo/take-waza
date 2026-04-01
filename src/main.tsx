@@ -6,23 +6,29 @@ import { WeavingPreview } from "./components/WeavingPreview";
 import { useDebounce } from "./hooks/useDebounce";
 import { usePatternParams } from "./hooks/usePatternParams";
 import { useStepNavigation } from "./hooks/useStepNavigation";
-import { generateSamplePattern } from "./lib/sample-patterns";
+import { useWasmEngine } from "./hooks/useWasmEngine";
 
 function App() {
 	const { params, setPattern, setWidth, setThickness, setCount } = usePatternParams();
 	const debouncedParams = useDebounce(params, 200);
+	const wasm = useWasmEngine();
+
 	const graph = useMemo(
 		() =>
-			generateSamplePattern(
+			wasm.generatePattern(
 				debouncedParams.pattern,
 				debouncedParams.width,
 				debouncedParams.thickness,
 				debouncedParams.count,
 			),
-		[debouncedParams],
+		[debouncedParams, wasm.generatePattern],
 	);
 
 	const navigation = useStepNavigation(graph);
+
+	const statusLabel = wasm.status === "ready" ? "WASM" : wasm.status === "loading" ? "Loading..." : "Fallback";
+
+	const statusColor = wasm.status === "ready" ? "#22c55e" : wasm.status === "loading" ? "#eab308" : "#9ca3af";
 
 	return (
 		<StrictMode>
@@ -48,6 +54,18 @@ function App() {
 				>
 					<h1 style={{ margin: 0, fontSize: "1.2rem" }}>take-waza</h1>
 					<span style={{ fontSize: "0.85rem", opacity: 0.7 }}>竹細工パターンデザイナー</span>
+					<span
+						style={{
+							marginLeft: "auto",
+							fontSize: "0.7rem",
+							padding: "2px 8px",
+							borderRadius: "4px",
+							backgroundColor: statusColor,
+							color: "#fff",
+						}}
+					>
+						{statusLabel}
+					</span>
 				</header>
 				<div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
 					<ParameterPanel

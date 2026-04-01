@@ -68,7 +68,6 @@ export function StepNavigator({ navigation }: StepNavigatorProps) {
 			<div
 				style={progressBarContainerStyle}
 				role="progressbar"
-				tabIndex={0}
 				aria-valuenow={currentStep + 1}
 				aria-valuemin={1}
 				aria-valuemax={sequence.totalSteps}
