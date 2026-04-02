@@ -11,7 +11,14 @@ export default defineConfig({
 	},
 	build: {
 		target: "ES2023",
+		rollupOptions: {
+			output: {
+				// Ensure WASM files are output with content hashes
+				assetFileNames: "assets/[name]-[hash][extname]",
+			},
+		},
 	},
+	assetsInclude: ["**/*.wasm"],
 	optimizeDeps: {
 		exclude: ["wasm-engine"],
 	},

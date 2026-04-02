@@ -67,8 +67,17 @@ export function useStepNavigation(graph: WeavingGraph): StepNavigationState {
 	const currentDescription = sequence.steps[currentStep]?.description ?? "";
 
 	// キーボードショートカット
+	// input/textarea にフォーカス中はカーソル移動を妨げないようにする
 	useEffect(() => {
 		function handleKeyDown(e: KeyboardEvent) {
+			const target = e.target;
+			if (
+				target instanceof HTMLInputElement ||
+				target instanceof HTMLTextAreaElement ||
+				target instanceof HTMLSelectElement
+			) {
+				return;
+			}
 			if (e.key === "ArrowRight") {
 				e.preventDefault();
 				setCurrentStep((prev) => Math.min(prev + 1, sequence.totalSteps - 1));
