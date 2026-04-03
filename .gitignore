@@ -32,7 +32,7 @@ playwright-report/
 
 # Rust/WASM (wasm-engine crate)
 wasm-engine/target/
-wasm-engine/pkg/
+# wasm-engine/pkg/ is tracked — build artifacts needed for the frontend
 
 # Misc
 *.log

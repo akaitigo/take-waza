@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useState } from "react";
-import type { PatternParams } from "../hooks/usePatternParams";
+import { MAX_COUNT, type PatternParams } from "../hooks/usePatternParams";
 import { isValidPatternName, PATTERN_NAMES, type PatternName } from "../lib/wasm-bridge";
 
 /** パターン名の日本語ラベル */
@@ -227,15 +227,26 @@ export function ParameterPanel({
 							<input
 								type="number"
 								min="1"
-								max="100"
+								max={MAX_COUNT}
 								step="1"
 								value={params.count}
 								onChange={handleCountChange}
 								style={numberInputStyle}
-								aria-label="竹ひごの本数（1-100）"
+								aria-label={`竹ひごの本数（1-${String(MAX_COUNT)}）`}
 							/>
-							<span style={{ fontSize: "0.85rem", opacity: 0.7 }}>本 (1-100)</span>
+							<span style={{ fontSize: "0.85rem", opacity: 0.7 }}>本 (1-{MAX_COUNT})</span>
 						</div>
+						{params.count >= MAX_COUNT && (
+							<span
+								style={{
+									fontSize: "0.75rem",
+									color: "#eab308",
+									marginTop: "4px",
+								}}
+							>
+								描画パフォーマンスのため上限 {MAX_COUNT} 本に制限されています
+							</span>
+						)}
 					</label>
 
 					{/* 情報表示 */}

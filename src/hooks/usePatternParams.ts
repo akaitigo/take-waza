@@ -10,6 +10,9 @@ export interface PatternParams {
 	readonly count: number;
 }
 
+/** Maximum count to prevent Three.js mesh count explosion */
+export const MAX_COUNT = 50;
+
 /** デフォルト値 */
 const DEFAULT_PARAMS: PatternParams = {
 	pattern: "gozame",
@@ -56,7 +59,7 @@ function parseUrlParams(): MutablePatternParams {
 	const count = params.get("count");
 	if (count) {
 		const parsed = Number.parseInt(count, 10);
-		if (Number.isFinite(parsed) && parsed >= 1 && parsed <= 100) {
+		if (Number.isFinite(parsed) && parsed >= 1 && parsed <= MAX_COUNT) {
 			result.count = parsed;
 		}
 	}
@@ -85,11 +88,16 @@ export function usePatternParams() {
 	const [params, setParamsRaw] = useState<PatternParams>(initialParams);
 
 	const setParams = useCallback((update: Partial<PatternParams>) => {
+		let next: PatternParams | undefined;
 		setParamsRaw((prev) => {
-			const next = { ...prev, ...update };
-			writeUrlParams(next);
+			next = { ...prev, ...update };
 			return next;
 		});
+		// Side-effect outside the state updater to avoid
+		// DOM mutations during React's render phase
+		if (next) {
+			writeUrlParams(next);
+		}
 	}, []);
 
 	const setPattern = useCallback(
@@ -115,7 +123,7 @@ export function usePatternParams() {
 
 	const setCount = useCallback(
 		(count: number) => {
-			setParams({ count: Math.min(100, Math.max(1, Math.round(count))) });
+			setParams({ count: Math.min(MAX_COUNT, Math.max(1, Math.round(count))) });
 		},
 		[setParams],
 	);
