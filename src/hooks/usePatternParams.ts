@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import type { PatternName } from "../lib/wasm-bridge";
-import { isValidPatternName } from "../lib/wasm-bridge";
+import { isValidPatternName, MAX_COUNT, type PatternName } from "../lib/wasm-bridge";
 
 /** パラメータの型定義 */
 export interface PatternParams {
@@ -9,9 +8,6 @@ export interface PatternParams {
 	readonly thickness: number;
 	readonly count: number;
 }
-
-/** Maximum count to prevent Three.js mesh count explosion */
-export const MAX_COUNT = 50;
 
 /** デフォルト値 */
 const DEFAULT_PARAMS: PatternParams = {

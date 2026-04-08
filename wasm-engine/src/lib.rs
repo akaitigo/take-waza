@@ -30,7 +30,7 @@ fn generate_pattern_json_inner(
 /// * `pattern_name` - パターン名 ("mutsume", "ajiro", "gozame")
 /// * `width` - 竹ひご幅 (mm, 0.1-50)
 /// * `thickness` - 竹ひご厚さ (mm, 0.1-10)
-/// * `count` - 本数 (1-1000)
+/// * `count` - 本数 (1-50)
 #[wasm_bindgen]
 pub fn generate_pattern_json(
     pattern_name: &str,
