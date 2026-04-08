@@ -13,9 +13,14 @@ export function decompose_steps_json(graph_json: string): string;
  * * `pattern_name` - パターン名 ("mutsume", "ajiro", "gozame")
  * * `width` - 竹ひご幅 (mm, 0.1-50)
  * * `thickness` - 竹ひご厚さ (mm, 0.1-10)
- * * `count` - 本数 (1-1000)
+ * * `count` - 本数 (1-50)
  */
-export function generate_pattern_json(pattern_name: string, width: number, thickness: number, count: number): string;
+export function generate_pattern_json(
+  pattern_name: string,
+  width: number,
+  thickness: number,
+  count: number,
+): string;
 
 /**
  * 利用可能なパターン名一覧を JSON 配列で返す
@@ -30,23 +35,51 @@ export function ping(): string;
 /**
  * 既存グラフのパラメータを変更して JSON で返す (WASM FFI)
  */
-export function transform_pattern_json(graph_json: string, new_width: number, new_thickness: number): string;
+export function transform_pattern_json(
+  graph_json: string,
+  new_width: number,
+  new_thickness: number,
+): string;
 
-export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
+export type InitInput =
+  | RequestInfo
+  | URL
+  | Response
+  | BufferSource
+  | WebAssembly.Module;
 
 export interface InitOutput {
-    readonly memory: WebAssembly.Memory;
-    readonly decompose_steps_json: (a: number, b: number) => [number, number, number, number];
-    readonly generate_pattern_json: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
-    readonly list_patterns: () => [number, number];
-    readonly ping: () => [number, number];
-    readonly transform_pattern_json: (a: number, b: number, c: number, d: number) => [number, number, number, number];
-    readonly __wbindgen_externrefs: WebAssembly.Table;
-    readonly __wbindgen_malloc: (a: number, b: number) => number;
-    readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
-    readonly __externref_table_dealloc: (a: number) => void;
-    readonly __wbindgen_free: (a: number, b: number, c: number) => void;
-    readonly __wbindgen_start: () => void;
+  readonly memory: WebAssembly.Memory;
+  readonly decompose_steps_json: (
+    a: number,
+    b: number,
+  ) => [number, number, number, number];
+  readonly generate_pattern_json: (
+    a: number,
+    b: number,
+    c: number,
+    d: number,
+    e: number,
+  ) => [number, number, number, number];
+  readonly list_patterns: () => [number, number];
+  readonly ping: () => [number, number];
+  readonly transform_pattern_json: (
+    a: number,
+    b: number,
+    c: number,
+    d: number,
+  ) => [number, number, number, number];
+  readonly __wbindgen_externrefs: WebAssembly.Table;
+  readonly __wbindgen_malloc: (a: number, b: number) => number;
+  readonly __wbindgen_realloc: (
+    a: number,
+    b: number,
+    c: number,
+    d: number,
+  ) => number;
+  readonly __externref_table_dealloc: (a: number) => void;
+  readonly __wbindgen_free: (a: number, b: number, c: number) => void;
+  readonly __wbindgen_start: () => void;
 }
 
 export type SyncInitInput = BufferSource | WebAssembly.Module;
@@ -59,7 +92,9 @@ export type SyncInitInput = BufferSource | WebAssembly.Module;
  *
  * @returns {InitOutput}
  */
-export function initSync(module: { module: SyncInitInput } | SyncInitInput): InitOutput;
+export function initSync(
+  module: { module: SyncInitInput } | SyncInitInput,
+): InitOutput;
 
 /**
  * If `module_or_path` is {RequestInfo} or {URL}, makes a request and
@@ -69,4 +104,9 @@ export function initSync(module: { module: SyncInitInput } | SyncInitInput): Ini
  *
  * @returns {Promise<InitOutput>}
  */
-export default function __wbg_init (module_or_path?: { module_or_path: InitInput | Promise<InitInput> } | InitInput | Promise<InitInput>): Promise<InitOutput>;
+export default function __wbg_init(
+  module_or_path?:
+    | { module_or_path: InitInput | Promise<InitInput> }
+    | InitInput
+    | Promise<InitInput>,
+): Promise<InitOutput>;

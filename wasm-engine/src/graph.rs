@@ -51,6 +51,11 @@ impl std::fmt::Display for PatternError {
     }
 }
 
+/// パターンの本数上限。
+/// TypeScript 側 (wasm-bridge.ts MAX_COUNT) と統一する。
+/// Three.js のメッシュ数爆発を防ぐためのパフォーマンス制限。
+pub const MAX_COUNT: u32 = 50;
+
 impl WeavingGraph {
     /// パラメータのバリデーション
     pub fn validate_params(width: f64, thickness: f64, count: u32) -> Result<(), PatternError> {
@@ -64,9 +69,9 @@ impl WeavingGraph {
                 message: format!("竹ひご厚さ {thickness}mm は範囲外です (0.1-10mm)"),
             });
         }
-        if count == 0 || count > 1000 {
+        if count == 0 || count > MAX_COUNT {
             return Err(PatternError {
-                message: format!("本数 {count} は範囲外です (1-1000)"),
+                message: format!("本数 {count} は範囲外です (1-{MAX_COUNT})"),
             });
         }
         Ok(())
@@ -132,7 +137,7 @@ mod tests {
     fn test_validate_params_ok() {
         assert!(WeavingGraph::validate_params(5.0, 1.0, 10).is_ok());
         assert!(WeavingGraph::validate_params(0.1, 0.1, 1).is_ok());
-        assert!(WeavingGraph::validate_params(50.0, 10.0, 1000).is_ok());
+        assert!(WeavingGraph::validate_params(50.0, 10.0, MAX_COUNT).is_ok());
     }
 
     #[test]
@@ -150,7 +155,7 @@ mod tests {
     #[test]
     fn test_validate_params_count_out_of_range() {
         assert!(WeavingGraph::validate_params(5.0, 1.0, 0).is_err());
-        assert!(WeavingGraph::validate_params(5.0, 1.0, 1001).is_err());
+        assert!(WeavingGraph::validate_params(5.0, 1.0, MAX_COUNT + 1).is_err());
     }
 
     #[test]

@@ -93,6 +93,13 @@ function parseWeavingGraph(json: string): WeavingGraph | null {
 	return null;
 }
 
+/**
+ * パターンの本数上限。
+ * UI・wasm-bridge・Rust(graph.rs) の3箇所で統一する唯一の定義。
+ * Three.jsのメッシュ数爆発を防ぐためのパフォーマンス制限。
+ */
+export const MAX_COUNT = 50;
+
 /** 利用可能なパターン名 */
 export const PATTERN_NAMES = ["mutsume", "ajiro", "gozame"] as const;
 export type PatternName = (typeof PATTERN_NAMES)[number];
