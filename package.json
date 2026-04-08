@@ -15,7 +15,7 @@
 		"format": "biome format --write .",
 		"typecheck": "tsc --noEmit",
 		"check": "npm run format && npm run lint && npm run typecheck && npm run test && npm run build",
-		"postinstall": "npx playwright install --with-deps || true"
+		"postinstall": "playwright install --with-deps"
 	},
 	"dependencies": {
 		"@react-three/drei": "^10.0.0",
