@@ -46,8 +46,9 @@ export function WeavingPreview({ graph, className, completedEdgeIds, currentEdge
 	}
 
 	// カメラ位置をグラフのサイズに基づいて計算
-	const maxX = Math.max(...graph.nodes.map((n) => Math.abs(n.x)));
-	const maxY = Math.max(...graph.nodes.map((n) => Math.abs(n.y)));
+	// reduce を使い、大量ノード時の Math.max(...spread) によるスタックオーバーフローを防止
+	const maxX = graph.nodes.reduce((acc, n) => Math.max(acc, Math.abs(n.x)), 0);
+	const maxY = graph.nodes.reduce((acc, n) => Math.max(acc, Math.abs(n.y)), 0);
 	const cameraDistance = Math.max(maxX, maxY, 20) * 1.5;
 
 	return (

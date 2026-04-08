@@ -38,6 +38,61 @@ export interface WeavingGraph {
 	readonly count: number;
 }
 
+/** unknown 値からプロパティを安全に取得する */
+function prop(obj: object, key: string): unknown {
+	return (obj as Record<string, unknown>)[key];
+}
+
+/** WeavingNode の型ガード */
+function isWeavingNode(value: unknown): value is WeavingNode {
+	if (typeof value !== "object" || value === null) return false;
+	return (
+		typeof prop(value, "id") === "number" &&
+		typeof prop(value, "x") === "number" &&
+		typeof prop(value, "y") === "number" &&
+		typeof prop(value, "z") === "number" &&
+		(prop(value, "crossing") === "over" || prop(value, "crossing") === "under")
+	);
+}
+
+/** WeavingEdge の型ガード */
+function isWeavingEdge(value: unknown): value is WeavingEdge {
+	if (typeof value !== "object" || value === null) return false;
+	return (
+		typeof prop(value, "id") === "number" &&
+		typeof prop(value, "from_node") === "number" &&
+		typeof prop(value, "to_node") === "number" &&
+		typeof prop(value, "width") === "number" &&
+		typeof prop(value, "thickness") === "number"
+	);
+}
+
+/** WeavingGraph の型ガード */
+export function isWeavingGraph(value: unknown): value is WeavingGraph {
+	if (typeof value !== "object" || value === null) return false;
+	const nodes = prop(value, "nodes");
+	const edges = prop(value, "edges");
+	return (
+		typeof prop(value, "pattern_name") === "string" &&
+		Array.isArray(nodes) &&
+		nodes.every(isWeavingNode) &&
+		Array.isArray(edges) &&
+		edges.every(isWeavingEdge) &&
+		typeof prop(value, "bamboo_width") === "number" &&
+		typeof prop(value, "bamboo_thickness") === "number" &&
+		typeof prop(value, "count") === "number"
+	);
+}
+
+/** JSON文字列をパースし、WeavingGraph として検証する。無効な場合は null を返す */
+function parseWeavingGraph(json: string): WeavingGraph | null {
+	const parsed: unknown = JSON.parse(json);
+	if (isWeavingGraph(parsed)) {
+		return parsed;
+	}
+	return null;
+}
+
 /** 利用可能なパターン名 */
 export const PATTERN_NAMES = ["mutsume", "ajiro", "gozame"] as const;
 export type PatternName = (typeof PATTERN_NAMES)[number];
@@ -122,7 +177,7 @@ export function wasmGeneratePattern(
 	if (wasmState.status !== "ready") return null;
 	try {
 		const json = wasmState.module.generate_pattern_json(patternName, width, thickness, count);
-		return JSON.parse(json) as WeavingGraph;
+		return parseWeavingGraph(json);
 	} catch {
 		return null;
 	}
@@ -137,7 +192,7 @@ export function wasmTransformPattern(graph: WeavingGraph, newWidth: number, newT
 	try {
 		const graphJson = JSON.stringify(graph);
 		const json = wasmState.module.transform_pattern_json(graphJson, newWidth, newThickness);
-		return JSON.parse(json) as WeavingGraph;
+		return parseWeavingGraph(json);
 	} catch {
 		return null;
 	}
