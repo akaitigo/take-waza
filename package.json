@@ -20,7 +20,7 @@
 	"dependencies": {
 		"@react-three/drei": "^10.0.0",
 		"@react-three/fiber": "^9.6.1",
-		"react": "^19.2.6",
+		"react": "^19.2.7",
 		"react-dom": "^19.2.6",
 		"three": "^0.184.0",
 		"vite-plugin-wasm": "^3.6.0"
@@ -28,7 +28,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.15",
 		"@playwright/test": "^1.60.0",
-		"@types/react": "^19.2.15",
+		"@types/react": "^19.2.16",
 		"@types/react-dom": "^19.0.0",
 		"@types/three": "^0.184.1",
 		"@vitejs/plugin-react": "^6.0.2",
